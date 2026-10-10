@@ -1,6 +1,6 @@
 """卡池定义、加载与时段可用性判定。
 
-卡池参数存储在 data/banners.json（单一真源，CLI 与网页演示页共用）。
+卡池参数存储在 data/banners.json（单一真源，Skill 交互层与底层引擎共用）。
 """
 
 from __future__ import annotations

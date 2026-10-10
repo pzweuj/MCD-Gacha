@@ -132,6 +132,24 @@
 - 验证：新增 `tests/test_source_fallback.py`（门店打烊回退 / 健康时保留真实源），
   全套 **90 项测试通过**；`ruff` 与合规自检通过；实测门店打烊时十连可正常回退完成。
 
+### 2026-10-10 · 做减法：收敛为「纯 Skill」单形态
+
+**16. 项目形态收敛（WorkBuddy 实现）**
+- 背景：项目此前提供「AI Skill / CLI / 网页试玩」三种形态，功能面越铺越宽，
+  与「这是一个 Skill」的定位不符；决定做减法，只保留 Skill 单形态；
+- 删除：`demo/` 网页试玩站（含 JS 引擎与测试）、
+  `docs/assets/hero-demo.gif` 与 `ui-initial.png` 演示素材、
+  `scripts/build_demo_data.py`、`scripts/make_gif.py`、`tests/test_data_sync.py`（网页数据同步测试）；
+- 保留：Python 引擎（`src/mcd_gacha/`）作为 Skill 的能力底座；CLI 从「独立产品」降级为
+  「Skill 内核 / 进阶调试入口」，命令一览移入 README 折叠区；
+- README 重写为单形态叙事：以「这是一个 AI Skill」开篇，删除网页试玩、三种用法与英文版链接，
+  hero 图改用分享卡样例 SVG；**中英双语同步改写**（`README.md` + `README_EN.md`）
+  并恢复双向语言切换链接，英文版同样只讲 Skill 单形态；
+- 同步清理悬空引用：`pyproject.toml` 移除 `pillow` 依赖并重锁 `uv.lock`、
+  `banners.py` 注释、`docs/design.md` 「多端一致性」章节改为「交互层（Skill）」、
+  `docs/compliance.md` 去网页表述；
+- 验证：删除后全套测试与合规自检通过，仓库跟踪文件从 64 个收敛到 49 个（含中英双语 README）。
+
 ## 工具使用说明
 
 - 本项目的调研（联网抓取比赛规则与 MCP 文档）、架构设计、代码生成、测试编写、

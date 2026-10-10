@@ -94,7 +94,7 @@ N 档的定位是「有趣但能用」：数量克制、预算内、适度点餐
 ## 7. 数据流
 
 ```
-CLI → Engine
+Skill / CLI → Engine
   ├── roll_rarity()        # 保底优先 + 加权抽样
   ├── generate_*()         # 四档组合生成（本文件第 3 节；候选收集可缓存）
   ├── source.calculate_price()  # 核价（mock 复刻 / MCP 真实）
@@ -103,13 +103,9 @@ CLI → Engine
   └── state.save()         # 保底计数 / 历史 / last_result 持久化
 ```
 
-## 8. 多端一致性
+## 8. 交互层（Skill）
 
-网页演示版（`demo/`）为同一套规则的 **JavaScript 移植**（`demo/gacha.js`），
-以 `node --test` 独立测试；概率 / 保底 / 预算约束与 Python 版保持一致：
-
-| 维度 | CLI（Python） | 网页（JS） | 一致性保障 |
-|------|--------------|-----------|-----------|
-| 概率与保底 | `engine.py` | `gacha.js` | 常量对齐（5/25/60/10 + 10 发保底），双端测试覆盖 |
-| 生成策略 | `generators.py` | `gacha.js` | 评分逻辑移植 + 预算约束断言 |
-| 数据 | `src/mcd_gacha/data/*.json` | `demo/data/*.json` | 单一真源 + 同步脚本 + `test_data_sync.py` 断言 |
+本项目只提供单一形态——**AI Skill**（`SKILL.md`）。Skill 是交互层，负责触发识别、
+命令编排、结果转写与可点击收尾；所有概率 / 保底 / 组合生成 / 核价逻辑仍由底层
+Python 引擎统一承载（`src/mcd_gacha/`），Skill 通过 `uvx` 调用引擎命令取值。
+参数（概率 / 卡池 / 预算）以 `src/mcd_gacha/data/banners.json` 为单一真源。

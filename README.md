@@ -11,20 +11,20 @@
 
 # 🍟 MCD-Gacha · 麦门抽卡模拟器
 
-**用二游抽卡机制决定「中午吃什么」**
+**一个 AI Skill：用二游抽卡机制决定「中午吃什么」**
 
-> 「中午不知道吃什么？把工位命运交给一顿预算内的单抽。」
+> 「中午不知道吃什么？对 AI 说一声「抽一发」，把工位命运交给一顿预算内的单抽。」
 
 <p align="center">
-  <img src="docs/assets/hero-demo.gif" width="780" alt="Mcd-Gacha 抽卡演示：连接 → 蓄力 → 金色传说 → 开出 SSR 巨无霸+薯条" />
+  <img src="docs/assets/sample-ssr.svg" width="560" alt="Mcd-Gacha 抽到 SSR 金卡时生成的像素风分享卡示例" />
 </p>
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](#-安装)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Skill](https://img.shields.io/badge/形态-AI_Skill-8A2BE2.svg)](#-这是一个-ai-skill)
 [![Gacha](https://img.shields.io/badge/Gacha-Active-success.svg)](#-卡池与概率)
 [![保底](https://img.shields.io/badge/保底-10_发必出金-F5A623.svg)](#-保底规则)
 [![MCP](https://img.shields.io/badge/MCP-mcp.mcd.cn-red.svg)](MCP_INTEGRATION.md)
-[![非官方](https://img.shields.io/badge/非官方-第三方开源玩具-lightgrey.svg)](#-合规声明)
+[![非官方](https://img.shields.io/badge/非官方-第三方开源玩具-lightgrey.svg)](#-安全与合规)
 
 **简体中文** | [English](README_EN.md)
 
@@ -53,60 +53,57 @@
 
 ## 🎰 这是什么？
 
-把「中午吃什么」的选择困难症，包装成**二游抽卡**：
+把「中午吃什么」的选择困难症，包装成**二游抽卡**，做成一个可装进 AI 智能体的 **Skill**：
 
 - 🎴 **三个卡池**：吃土经济学常驻池 / 打工人回血限定 UP 池 / 深夜玄学宵夜池（21:00-04:00 限时）
 - ✨ **四档稀有度**：金卡（欧皇金光）→ 紫卡 → 蓝卡 → 隐藏灰卡（抽象艺术）
 - 🛡️ **10 发硬保底**：连续 9 发未出金，第 10 发必出金
 - 🔨 **重铸玩法**：不满意组合里某一件？同品类重铸换一件（优先升级/平价），**不消耗保底进度**
 - 💰 **真实核价**：接入[麦当劳 MCP Server](MCP_INTEGRATION.md)，菜单与价格来自官方接口（也可离线试玩）
-- 🛒 **可下单（安全闸门）**：`mcd-gacha order` 把抽到的组合提交给官方 MCP。**先抽卡，下单时再确认地点和取餐方式**——默认只试运行并列出候选门店 + 取餐方式，加 `--confirm --store-code <编号> --take-way-code <堂食/外带>` 才真正下单并回显支付链接
+- 🛒 **可下单（安全闸门）**：把抽到的组合提交给官方 MCP。**先抽卡，下单时再确认地点和取餐方式**——默认只试运行并列出候选门店 + 取餐方式，用户明确确认后才真正下单并回显支付链接
 - 🧾 **晒卡利器**：抽卡结果一键生成像素风 SVG 分享卡，随手发群
-- ⚖️ **概率透明**：内置 `simulate` 蒙特卡洛自证命令，出率随时可验证
+- ⚖️ **概率透明**：内置蒙特卡洛自证命令，出率随时可验证
+- 🖱️ **对话式收尾**：每次抽完用**可点击选项**（十连 / 重铸一件 / 下单 / 看保底进度）承接下一步，不用打字
 
-## 🧩 三种用法（任选其一，同一套引擎）
+## 🧩 这是一个 AI Skill
 
-| 形态 | 怎么用 | 适合场景 |
-|------|--------|----------|
-| 🧩 **AI Skill** | 把本仓库装进 WorkBuddy / Claude 等支持 Skill 的 Agent，对 AI 说「抽一发」「帮我决定午饭」即可（定义见 [`SKILL.md`](SKILL.md)） | 对话式摸鱼 |
-| ⌨️ **CLI 应用** | `uvx --from git+https://github.com/pzweuj/mcd-gacha mcd-gacha pull`（即下方「30 秒上手」） | 终端极客、脚本自动化 |
-| 🌐 **在线试玩** | **[点开即抽](https://pzweuj.github.io/mcd-gacha/)**（GitHub Pages，零安装翻牌动画版） | 不想装环境的路人 |
+本项目只提供**一种形态：AI Skill**。把仓库作为 Skill 装进 WorkBuddy / Claude 等支持 Skill 的 Agent，
+之后对本地说「**抽一发**」「**帮我决定午饭**」「**把午饭交给命运**」即可触发——
+`SKILL.md` 是 Skill 的完整定义（触发词、命令编排、结果转写规则、合规红线）。
 
-> Skill 形态与 CLI 应用共享同一套概率引擎与核价逻辑：`SKILL.md` 是交互层，Python 引擎是能力底座。
+```
+Skill（SKILL.md · 交互层）  ──调用──▶  Python 引擎（src/mcd_gacha/ · 能力底座）
+        │                                        │
+   触发识别 / 结果转写 /                  概率 · 保底 · 组合生成
+   可点击收尾 / 合规红线                  · 预算优化 · MCP 核价
+```
 
-> 🌐 **在线试玩是怎么部署的**：[`demo/`](demo/) 是**零依赖纯静态站**（无构建步骤、全部相对路径，可直接跑在子路径下），
-> 由 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) 在每次推送后自动发布到 GitHub Pages。
-> 仓库需命名为小写 `mcd-gacha`，并在 **Settings → Pages → Source** 选择「GitHub Actions」。
+- **Skill 是交互层**：负责把自然语言翻译成引擎命令，再把 JSON 结果转写成友好卡片；
+- **Python 引擎是能力底座**：承载全部概率、保底、组合生成、核价与下单逻辑，Skill 通过 `uvx` 调用；
+- 两者是**同一套引擎**的一体两面：Skill 不含独立规则，改概率/卡池只需改引擎的 `banners.json`。
 
 ## 🚀 30 秒上手
 
-**方式零：在线试玩（零安装，翻牌动画版）**
+**第 1 步：把本仓库装为 Skill**
 
-👉 **<https://pzweuj.github.io/mcd-gacha/>**
+将本仓库放入 WorkBuddy / Claude 等 Agent 的 **skills 目录**（或以 Skill 形式导入），
+`SKILL.md` 即为其定义。WorkBuddy 用户也可在对话中直接引用本仓库技能。
 
-**方式一：零配置试玩（内置演示菜单，无需任何 Token）**
+**第 2 步：对 AI 说话就行**
 
-```bash
-# 需要已安装 uv（https://docs.astral.sh/uv/）
-uvx --from git+https://github.com/pzweuj/mcd-gacha mcd-gacha pull
+```text
+你：抽一发
+AI：━━━ 开 箱 ━━━ …（此处为抽卡结果）…
+    [十连] [重铸一件] [下单] [看保底进度]
 ```
 
-**方式二：安装到本地（推荐，后续命令更短）**
+**第 3 步（可选）：切换真实菜单**
 
-```bash
-# 用 uv 或 pipx 安装
-uv tool install git+https://github.com/pzweuj/mcd-gacha
-# 或
-pipx install git+https://github.com/pzweuj/mcd-gacha
-```
+默认使用**内置演示菜单，零配置离线可玩**。若要体验真实菜单与在线核价，
+按 [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md) 配置 `MCD_MCP_TOKEN` 即可，失败会自动回退演示数据。
 
-然后用一条命令开抽：
-
-```bash
-$ mcd-gacha pull                    # 单抽（按时段自动选卡池）
-$ mcd-gacha ten -b worker           # 打工人 UP 池十连
-$ mcd-gacha simulate -n 100000      # 概率自证
-```
+> 🌐 无需安装任何东西 —— Skill 内部用 `uvx --from git+https://github.com/pzweuj/mcd-gacha mcd-gacha …`
+> 零安装拉起引擎命令；已安装 `mcd-gacha` 时则直接用本地命令。
 
 ## 🎮 体验预览
 
@@ -149,10 +146,10 @@ $ mcd-gacha simulate -n 100000      # 概率自证
 ### 📢 概率透明声明
 
 基础出金率 5% 叠加 10 发硬保底后，**SSR 有效出率约 12.5%**（平均约 8 抽一金）。
-不信？自己验：
+不信？自己验（Skill 亦可代跑）：
 
 ```bash
-$ mcd-gacha simulate -n 100000 --seed 42
+mcd-gacha simulate -n 100000 --seed 42
 ```
 
 ```
@@ -165,9 +162,9 @@ $ mcd-gacha simulate -n 100000 --seed 42
 
 抽到的组合里有一件不想要？**重铸**它——二游式「锁定重铸」：
 
-```bash
-$ mcd-gacha reroll --slot 2
-  🔨 重铸第 2 件：“辣”么快乐套餐 → 麦香鸡套餐
+```text
+你：第二件不要，重铸一下
+AI：🔨 重铸第 2 件：“辣”么快乐套餐 → 麦香鸡套餐
 ```
 
 - **同品类替换**：只换指定件（可乐换可乐位、汉堡换汉堡位），其余卡面保持；
@@ -175,18 +172,20 @@ $ mcd-gacha reroll --slot 2
 - **不消耗保底**：重铸是「工艺」不是抽卡——保底进度条纹丝不动；
 - **预算硬约束**：重铸后组合仍在预算内（券后实付 ≤ 预算）。
 
-## 📦 安装
+## 📦 安装与配置
 
-```bash
-# 方式 A：uv（推荐）
-uv tool install git+https://github.com/pzweuj/mcd-gacha
+### 🧩 安装 Skill（唯一形态）
 
-# 方式 B：pipx
-pipx install git+https://github.com/pzweuj/mcd-gacha
+将本仓库作为 Skill 目录装进你的 Agent：
 
-# 方式 C：pip（进入虚拟环境后）
-pip install git+https://github.com/pzweuj/mcd-gacha
+```text
+<你的 Agent skills 目录>/
+└── mcd-gacha/
+    ├── SKILL.md      # Skill 定义（第一步读这个）
+    └── …             # 底层引擎（Skill 通过 uvx 调用，无需手动安装）
 ```
+
+装好后，直接对 AI 说「抽一发」即可，其余交给 Skill。
 
 ### 🔗 真实 MCP 模式（可选）
 
@@ -200,24 +199,28 @@ pip install git+https://github.com/pzweuj/mcd-gacha
 3. 配置门店（到店取餐，二选一）：
    - `mcd-gacha config set-store --city 深圳市`（自动选择最近门店）
    - `mcd-gacha config set-store --store-code 1421182`（固定门店；编号可用 `mcd-gacha stores --city 深圳市` 查询）
-4. 安装 MCP 依赖并开抽：
-
-```bash
-pip install "mcd-gacha[mcp]"
-mcd-gacha pull --real          # 有 Token 时也可省略 --real 直接体验
-mcd-gacha stores               # 查询附近门店（选 storeCode 用）
-```
 
 MCP 接入细节（工具清单、调用流程、价格口径与安全设计）见 [MCP_INTEGRATION.md](MCP_INTEGRATION.md)。
 
-## 🕹️ 命令一览
+### ⚙️ 引擎底座（进阶，可选）
+
+Skill 内部通过 `uvx` 免安装调用引擎；若你希望本机常驻一条更短的 `mcd-gacha` 命令
+（调试、脚本自动化或离线排查），可自行安装引擎：
+
+```bash
+uv tool install git+https://github.com/pzweuj/mcd-gacha   # 或 pipx install …
+pip install "mcd-gacha[mcp]"                              # 真实 MCP 模式所需（可选）
+```
+
+<details>
+<summary>引擎命令一览（供 Skill 调用 / 进阶调试）</summary>
 
 | 命令 | 说明 |
 |------|------|
 | `mcd-gacha pull` | 单抽（`-b` 选卡池，`--budget` 定预算，`--real` 真实 MCP，`--json` 输出 JSON） |
 | `mcd-gacha ten` | 十连（共享保底计数器） |
 | `mcd-gacha reroll --slot N` | 重铸第 N 件（同品类替换，不耗保底） |
-| `mcd-gacha order` | 下单最近一次组合（先抽卡，**下单时再确认地点与取餐方式**）：默认**试运行**并列出候选门店 + 取餐方式；`--confirm --store-code <编号> --take-way-code <堂食/外带>` 才真正提交 |
+| `mcd-gacha order` | 下单最近一次组合：默认**试运行**并列出候选门店 + 取餐方式；`--confirm --store-code <编号> --take-way-code <堂食/外带>` 才真正提交 |
 | `mcd-gacha banners` | 卡池一览与开放状态 |
 | `mcd-gacha status` | 保底进度与生涯统计 |
 | `mcd-gacha simulate` | 蒙特卡洛概率自证 |
@@ -226,24 +229,27 @@ MCP 接入细节（工具清单、调用流程、价格口径与安全设计）�
 | `mcd-gacha config set-token` | 保存 MCP Token（仅存本地） |
 | `mcd-gacha config set-store` | 保存门店（城市或门店编号） |
 
+</details>
+
 ## 🏗️ 架构
 
 ```mermaid
 flowchart LR
-    CLI[CLI / rich 渲染] --> Engine[抽卡引擎<br/>概率 · 保底 · 组合生成]
+    Skill[AI Skill<br/>SKILL.md · 交互层] --> Engine[抽卡引擎<br/>概率 · 保底 · 组合生成]
     Engine --> Optimizer[预算优化<br/>0/1 背包 + 最优券]
     Engine --> DS{数据源抽象}
     DS -->|无 Token| Mock[内置演示快照<br/>离线可玩]
     DS -->|有 Token| MCP[麦当劳 MCP<br/>真实菜单与核价]
 ```
 
+- **单一形态**：Skill 是唯一面向用户的入口；Python 引擎是被 Skill 调用的能力底座；
 - **数据源抽象**：`MockDataSource`（内置快照）与 `McpDataSource`（真实 MCP）同协议，随时切换、失败自动回退；
 - **组合生成**：四档稀有度对应四种策略，统一出口校验「券后实付 ≤ 预算」；
-- **参数单一真源**：概率 / 卡池 / 预算集中在 `banners.json`，CLI 与网页演示页共用。
+- **参数单一真源**：概率 / 卡池 / 预算集中在 `banners.json`，Skill 与引擎共用。
 
 ## 🛡️ 安全与合规
 
-- **下单需显式确认，且先确认地点与取餐方式**：`mcd-gacha order` 默认只做**试运行**（dry-run，不产生订单）并列出候选门店与取餐方式；必须加 `--confirm`（可配 `--store-code` / `--take-way-code`）才会调用 `create-order`；命令只返回订单号与支付链接，**支付由用户在麦当劳官方渠道自行完成**，本项目不代付；
+- **下单需显式确认，且先确认地点与取餐方式**：`order` 默认只做**试运行**（dry-run，不产生订单）并列出候选门店与取餐方式；必须由用户明确确认后才真正调用 `create-order`；命令只返回订单号与支付链接，**支付由用户在麦当劳官方渠道自行完成**，本项目不代付；
 - **Token 安全**：Token 仅存本地（环境变量 / `.env` / 本地配置），不进版本库，示例配置只含环境变量占位符；
 - **非官方声明**：本项目为第三方开源玩具，非麦当劳官方产品；请理性消费、快乐生活。
 
@@ -253,7 +259,7 @@ flowchart LR
 
 **有意不做**
 
-- ❄️ **不自动下单 / 不代付**：抽卡与核价默认全程只读；`order` 命令必须显式 `--confirm` 且只负责提交订单、回显支付链接——支付与退款一律走麦当劳官方渠道；
+- ❄️ **不自动下单 / 不代付**：抽卡与核价默认全程只读；下单必须显式确认且只负责提交订单、回显支付链接——支付与退款一律走麦当劳官方渠道；
 - 🎯 **不做营养/医疗建议**：热量数据仅供娱乐参考，不构成膳食建议；
 - 🧮 **不做全量忌口系统**：组合生成不排除过敏原（麦当劳 MCP 未提供结构化过敏原字段），有严格忌口需求请以官方菜单标注为准。
 
@@ -265,8 +271,7 @@ flowchart LR
 
 **尚未完成（路线图内）**
 
-- 🖼️ 分享卡 PNG 一键导出（SVG 原生支持；PNG 需可选依赖 cairosvg）；
-- 📱 网页版移动端细节打磨（已响应式，持续优化）。
+- 🖼️ 分享卡 PNG 一键导出（SVG 原生支持；PNG 需可选依赖 cairosvg）。
 
 ## 🤝 参与贡献
 
