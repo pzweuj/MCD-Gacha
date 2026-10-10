@@ -1,0 +1,15 @@
+# 跨平台统一换行符，避免 Windows 下脚本在 Linux CI 报错
+* text=auto eol=lf
+
+# 二进制素材
+*.gif binary
+*.png binary
+*.jpg binary
+*.ico binary
+
+# 文本素材（保持 LF）
+*.svg text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf

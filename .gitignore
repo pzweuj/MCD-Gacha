@@ -1,0 +1,33 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# --- 工具缓存 ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- 本地凭据与状态（绝不入库）---
+.env
+*.token
+config.toml
+mcd-config.local.toml
+
+# --- 操作系统 ---
+.DS_Store
+Thumbs.db
+
+# --- 临时产物 ---
+*.log
+tmp/
+.tmp-probe/
+.playwright-cli/
+
+# --- 本地智能体工作数据（不属于项目内容）---
+.workbuddy/
+.tmp-probe/

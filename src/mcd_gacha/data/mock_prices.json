@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "note": "演示用优惠券快照（非实时数据）。真实券面规则与可用范围以麦当劳官方渠道为准。",
+  "pricing_rules": {
+    "single_coupon_only": true,
+    "single_coupon_note": "同一订单默认只使用一张最优惠的券（与真实点餐惯例一致）。",
+    "delivery_fee_note": "本项目为到店取餐场景演示，不额外计算外送费。"
+  },
+  "coupons": [
+    {
+      "id": "C25-4",
+      "name": "满 25 减 4",
+      "type": "threshold",
+      "threshold": 25.0,
+      "amount": 4.0,
+      "scope": "all",
+      "desc": "整单满 25 元减 4 元"
+    },
+    {
+      "id": "C30-6",
+      "name": "满 30 减 6",
+      "type": "threshold",
+      "threshold": 30.0,
+      "amount": 6.0,
+      "scope": "all",
+      "desc": "整单满 30 元减 6 元"
+    },
+    {
+      "id": "C40-8",
+      "name": "满 40 减 8",
+      "type": "threshold",
+      "threshold": 40.0,
+      "amount": 8.0,
+      "scope": "all",
+      "desc": "整单满 40 元减 8 元"
+    },
+    {
+      "id": "CI01",
+      "name": "薯条控立减 3",
+      "type": "item",
+      "item_code": "4810",
+      "amount": 3.0,
+      "scope": "item",
+      "desc": "购买薯条立减 3 元"
+    },
+    {
+      "id": "CI02",
+      "name": "咖啡尝鲜立减 4",
+      "type": "item",
+      "item_code": "507409",
+      "amount": 4.0,
+      "scope": "item",
+      "desc": "购买麦咖啡™奶铁立减 4 元"
+    },
+    {
+      "id": "CI03",
+      "name": "麦乐鸡立减 2",
+      "type": "item",
+      "item_code": "1401",
+      "amount": 2.0,
+      "scope": "item",
+      "desc": "购买麦乐鸡立减 2 元"
+    }
+  ]
+}
