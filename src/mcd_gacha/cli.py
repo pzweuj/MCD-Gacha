@@ -763,19 +763,74 @@ async def _stores_impl(city: str | None) -> None:
 
 
 @app.command()
-def doctor() -> None:
+def doctor(
+    as_json: bool = typer.Option(
+        False, "--json", help="以 JSON 格式输出（供 AI / 脚本判定是否已接入 MCP）"
+    ),
+) -> None:
     """环境自检：Token 来源、门店设置、MCP 连通性（排障第一步）。"""
-    asyncio.run(_doctor_impl())
+    asyncio.run(_doctor_impl(as_json))
 
 
-async def _doctor_impl() -> None:
+async def _collect_doctor_report() -> dict:
+    """收集环境自检的结构化结果（文本渲染与 --json 共用）。"""
+    token, source = get_token_with_source()
+    store_code, city = get_store_settings()
+    report: dict = {
+        "token_found": bool(token),
+        "token_source": source,
+        "token_masked": mask_token(token) if token else None,
+        "store_code": store_code or None,
+        "city": city or None,
+        "config_file": str(get_config_file()),
+        "state_file": str(get_state_file()),
+        "mcp_connected": False,
+        "mcp_tools": None,
+        "meal_count": None,
+        "store_label": None,
+        "mcp_error": None,
+        "mode": "mock",
+    }
+    if not token:
+        return report
+
+    mcp_source = None
+    try:
+        from .datasource.mcp import McpDataSource
+
+        mcp_source = McpDataSource(token=token, store_code=store_code, city=city)
+        await mcp_source.start()
+        report["meal_count"] = len(await mcp_source.query_meals())
+        report["mcp_tools"] = await mcp_source.tool_count()
+        store_obj = getattr(mcp_source, "_store", None)
+        report["store_label"] = (store_obj.name if store_obj else "") or (store_code or "") or None
+        report["mcp_connected"] = True
+        report["mode"] = "mcp"
+    except Exception as exc:  # noqa: BLE001 —— 网络/鉴权/依赖缺失统一记为未连接
+        report["mcp_error"] = str(exc)
+    finally:
+        # 无论成功失败都必须关闭连接：否则 MCP 的 async generator 会残留在
+        # AsyncExitStack 里，被 GC 时在 event loop 关闭阶段抛
+        # "Attempted to exit cancel scope in a different task"，污染 --json 输出。
+        if mcp_source is not None:
+            with contextlib.suppress(Exception):
+                await mcp_source.close()
+    return report
+
+
+async def _doctor_impl(as_json: bool = False) -> None:
+    report = await _collect_doctor_report()
+
+    if as_json:
+        typer.echo(jsonlib.dumps(report, ensure_ascii=False, indent=2))
+        return
+
     console.print("\n[bold]🩺 Mcd-Gacha 环境自检[/bold]\n")
 
     # 1) Token 与来源
-    token, source = get_token_with_source()
-    if token:
-        console.print(f"  🔑 MCP Token：{mask_token(token)}")
-        console.print(f"     来源：{source}")
+    if report["token_found"]:
+        console.print(f"  🔑 MCP Token：{report['token_masked']}")
+        console.print(f"     来源：{report['token_source']}")
     else:
         console.print("  🔑 MCP Token：[yellow]未找到[/yellow]（演示模式仍可完整使用）")
         console.print(
@@ -784,10 +839,10 @@ async def _doctor_impl() -> None:
         )
 
     # 2) 门店设置
-    store_code, city = get_store_settings()
-    if store_code or city:
+    if report["store_code"] or report["city"]:
         console.print(
-            f"  🏪 门店设置：store_code={store_code or '（未配置）'}，city={city or '（未配置）'}"
+            f"  🏪 门店设置：store_code={report['store_code'] or '（未配置）'}，"
+            f"city={report['city'] or '（未配置）'}"
         )
     else:
         console.print(
@@ -796,26 +851,21 @@ async def _doctor_impl() -> None:
         )
 
     # 3) 路径
-    console.print(f"  📄 配置文件：{get_config_file()}")
-    console.print(f"  🎯 状态文件：{get_state_file()}")
+    console.print(f"  📄 配置文件：{report['config_file']}")
+    console.print(f"  🎯 状态文件：{report['state_file']}")
 
     # 4) 连通性检测
-    if token:
-        console.print("\n  🔌 正在检测真实 MCP 连通性 ...")
-        try:
-            from .datasource.mcp import McpDataSource
-
-            mcp_source = McpDataSource(token=token, store_code=store_code, city=city)
-            await mcp_source.start()
-            meal_count = len(await mcp_source.query_meals())
-            tools = await mcp_source.tool_count()
-            store_name = getattr(mcp_source, "_store", None)
-            store_label = (store_name.name if store_name else "") or (store_code or "")
-            await mcp_source.close()
-            console.print(f"  🛰 麦当劳 MCP：[green]✅ 已连接[/green]（{tools} 个工具）")
-            console.print(f"     门店：{store_label or '（未指定）'} | 在售餐品：{meal_count} 个")
-        except Exception as exc:  # noqa: BLE001
-            console.print(f"  🛰 麦当劳 MCP：[yellow]⚠️ 连接失败（{exc}）[/yellow]")
+    if report["token_found"]:
+        if report["mcp_connected"]:
+            console.print(
+                f"  🛰 麦当劳 MCP：[green]✅ 已连接[/green]（{report['mcp_tools']} 个工具）"
+            )
+            console.print(
+                f"     门店：{report['store_label'] or '（未指定）'} | "
+                f"在售餐品：{report['meal_count']} 个"
+            )
+        else:
+            console.print(f"  🛰 麦当劳 MCP：[yellow]⚠️ 连接失败（{report['mcp_error']}）[/yellow]")
             console.print(
                 "     [dim]提示：若为网络代理问题，可尝试设置 NO_PROXY=mcp.mcd.cn；"
                 "未配置门店请先运行 config set-store[/dim]"

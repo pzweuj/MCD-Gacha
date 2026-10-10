@@ -102,15 +102,18 @@ AI:  ━━━ OPEN ━━━ … (your pull result appears here) …
      [10-pull] [Reforge one] [Order] [View pity]
 ```
 
-**Step 3 (optional) — Switch to the real menu**
+**Step 3 — Switch to the real menu (recommended)**
 
-By default the Skill uses a **bundled demo menu — zero config, fully offline**. To get the
-real menu and live pricing, set `MCD_MCP_TOKEN` as described in
-[`MCP_INTEGRATION.md`](MCP_INTEGRATION.md); on any failure it falls back to demo data automatically.
+Before the **first pull of a session**, the Skill runs an MCP self-check:
+- Connected → it uses the **real menu with live pricing**；
+- Not connected → it **proactively walks you through connecting** (token application + client config); the bundled demo menu is used only if you explicitly decline.
 
 > 🌐 Nothing to install — internally the Skill runs
-> `uvx --from git+https://github.com/pzweuj/mcd-gacha mcd-gacha …`
+> `uvx --from "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha" mcd-gacha …`
 > to boot the engine with zero setup; if `mcd-gacha` is already installed, it uses the local command.
+>
+> ⚠️ The command **must** carry the `[mcp]` extra — otherwise the engine lacks the `mcp`
+> dependency, the real MCP cannot connect, and it silently falls back to demo data.
 
 ## 🎮 Preview
 
@@ -194,9 +197,27 @@ Drop this repo into your agent's Skill directory:
 
 Then just say "pull one" — the rest is handled by the Skill.
 
-### 🔗 Real MCP mode (optional)
+### 🔗 Real MCP mode (recommended)
 
-The bundled demo menu is the default (offline-playable). For the **real menu and live pricing**:
+Before the **first pull of a session**, the Skill self-checks the MCP: connected → it uses the **real menu with live pricing**; not connected → it **walks you through setup** (token application + client config JSON). The bundled demo menu (offline-playable, no ordering) is used only if you explicitly decline.
+
+Enabling the real menu takes two things: **① install the dependency with the `[mcp]` extra** (`uv tool install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"`, or use `uvx --from "mcd-gacha[mcp] @ git+…"` as the command prefix); **② configure the MCP token** (below).
+
+To get the **real menu and live pricing**, paste this into your client (WorkBuddy Connectors / Cherry Studio / Cursor / Trae, etc.):
+
+```json
+{
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
+    }
+  }
+}
+```
+
+Or configure it locally:
 
 1. Apply for an MCP token at the [McDonald's MCP open platform](https://open.mcd.cn/mcp);
 2. Configure the token (three options):
@@ -215,8 +236,10 @@ The Skill boots the engine via `uvx` with no install; if you'd rather have a per
 `mcd-gacha` command locally (for debugging, scripting or offline checks), install the engine yourself:
 
 ```bash
-uv tool install git+https://github.com/pzweuj/mcd-gacha   # or: pipx install …
-pip install "mcd-gacha[mcp]"                              # required for real MCP mode (optional)
+# Always include the [mcp] extra: it's required for the real menu / live pricing
+# (without it the engine silently falls back to demo data)
+uv tool install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"
+# or: pipx install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"
 ```
 
 <details>

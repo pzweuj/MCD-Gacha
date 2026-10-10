@@ -97,13 +97,17 @@ AI：━━━ 开 箱 ━━━ …（此处为抽卡结果）…
     [十连] [重铸一件] [下单] [看保底进度]
 ```
 
-**第 3 步（可选）：切换真实菜单**
+**第 3 步：切换真实菜单（推荐）**
 
-默认使用**内置演示菜单，零配置离线可玩**。若要体验真实菜单与在线核价，
-按 [`MCP_INTEGRATION.md`](MCP_INTEGRATION.md) 配置 `MCD_MCP_TOKEN` 即可，失败会自动回退演示数据。
+技能在**首次抽卡前会先做一次 MCP 自检**：
+- 已接入 → 直接用**真实菜单 + 在线核价**；
+- 未接入 → **主动引导你完成接入**（含 Token 申请与客户端配置），你明确表示不配置时才使用内置演示菜单。
 
-> 🌐 无需安装任何东西 —— Skill 内部用 `uvx --from git+https://github.com/pzweuj/mcd-gacha mcd-gacha …`
+> 🌐 无需安装任何东西 —— Skill 内部用
+> `uvx --from "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha" mcd-gacha …`
 > 零安装拉起引擎命令；已安装 `mcd-gacha` 时则直接用本地命令。
+>
+> ⚠️ 命令必须带 `[mcp]` extra —— 否则引擎缺少 `mcp` 依赖，真实 MCP 连不上、会静默落回演示数据。
 
 ## 🎮 体验预览
 
@@ -187,9 +191,27 @@ AI：🔨 重铸第 2 件：“辣”么快乐套餐 → 麦香鸡套餐
 
 装好后，直接对 AI 说「抽一发」即可，其余交给 Skill。
 
-### 🔗 真实 MCP 模式（可选）
+### 🔗 真实 MCP 模式（推荐）
 
-默认使用内置演示菜单（离线可玩）。若要体验**真实菜单与在线核价**：
+**技能会在本会话首次抽卡前自动自检 MCP**：已接入 → 直接走**真实菜单 + 在线核价**；未接入 → **主动引导你完成接入**（含 Token 申请与客户端配置 JSON）；只有你明确表示不配置，才使用内置演示菜单（离线可玩、不可下单）。
+
+启用真实菜单需要两件事：**① 安装带 `[mcp]` extra 的依赖**（`uv tool install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"`，或命令前缀用 `uvx --from "mcd-gacha[mcp] @ git+…"`）；**② 配置 MCP Token**（见下）。
+
+若要体验**真实菜单与在线核价**，在客户端（WorkBuddy 连接器 / Cherry Studio / Cursor / Trae 等）粘贴：
+
+```json
+{
+  "mcpServers": {
+    "mcd-mcp": {
+      "type": "streamablehttp",
+      "url": "https://mcp.mcd.cn",
+      "headers": { "Authorization": "Bearer YOUR_MCP_TOKEN" }
+    }
+  }
+}
+```
+
+或按下面步骤在本机配置：
 
 1. 在 [麦当劳 MCP 开放平台](https://open.mcd.cn/mcp) 申请 MCP Token；
 2. 配置 Token（三选一）：
@@ -208,8 +230,9 @@ Skill 内部通过 `uvx` 免安装调用引擎；若你希望本机常驻一条�
 （调试、脚本自动化或离线排查），可自行安装引擎：
 
 ```bash
-uv tool install git+https://github.com/pzweuj/mcd-gacha   # 或 pipx install …
-pip install "mcd-gacha[mcp]"                              # 真实 MCP 模式所需（可选）
+# 务必带 [mcp] extra：真实菜单/在线核价必需（缺它会静默落回演示数据）
+uv tool install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"
+# 或：pipx install "mcd-gacha[mcp] @ git+https://github.com/pzweuj/mcd-gacha"
 ```
 
 <details>
